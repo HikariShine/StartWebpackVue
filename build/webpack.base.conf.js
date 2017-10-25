@@ -10,6 +10,8 @@ function resolve (dir) {
 
 module.exports = {
   entry: {
+    // 为什么指定为./src/main.js？可能是因为这个路径是以package.json为base路径获取的
+    // 下面的其他的都是以这个目录为路径获取的，使用上面那个resolve方法。
     app: './src/main.js'
   },
   output: {
