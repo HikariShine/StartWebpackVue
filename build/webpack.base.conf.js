@@ -38,22 +38,39 @@ module.exports = {
       ? config.build.assetsPublicPath
       : config.dev.assetsPublicPath
   },
+  // 设置模块如何被解析。webpack 提供合理的默认值，但是还是可能会修改一些解析的细节。
+  // 关于 resolver 具体如何工作的更多解释说明，请查看模块解析方式。
   resolve: {
+    // 自动解析确定的扩展。默认值为：.js,.json。能够使用户在引入模块时不带扩展。
     extensions: ['.js', '.vue', '.json'],
+    // 创建 import 或 require 的别名，来确保模块引入变得更简单
     alias: {
+      // 在给定对象的键后的末尾添加 $，以表示精准匹配。下面这个代表/项目根目录/node_modules/vue/dist/vue.esm.js
       'vue$': 'vue/dist/vue.esm.js',
+      // 文档里没见，大概是指本项目js的解析目录为src？
       '@': resolve('src'),
     }
   },
   // module用于加载loader，loader仅仅基于文件进行转换，而插件就没有这个限制。
   // 这个配置文件里没有，插件使用plugins:定义，常用于（但不限于）在打包模块的
   // “compilation” 和 “chunk” 生命周期执行操作和自定义功能（查看更多）。
+
+  // loader支持以下模块方式
+  // 对比 Node.js 模块，webpack 模块能够以各种方式表达它们的依赖关系，几个例子如下：
+  // ES2015 import 语句
+  // CommonJS require() 语句
+  // AMD define 和 require 语句
+  // css/sass/less 文件中的 @import 语句。
+  // 样式(url(...))或 HTML 文件(<img src=...>)中的图片链接(image url)
   module: {
     // rules数组支持配置不同的loader，每个loader都是一个文件处理器
     // loader 用于对模块的源代码进行转换。loader 可以使你在 import 或"加载"模块时预处理文件。
     // 因此，loader 类似于其他构建工具中“任务(task)”，并提供了处理前端构建步骤的强大方法。
     // loader 可以将文件从不同的语言（如 TypeScript）转换为 JavaScript，或将内联图像转换为 data URL。
     // loader 甚至允许你直接在 JavaScript 模块中 import CSS文件！
+    // 插件(plugin)可以为 loader 带来更多特性。
+    // loader 能够产生额外的任意文件。
+    // loader 通过（loader）预处理函数，为 JavaScript 生态系统提供了更多能力。用户现在可以更加灵活地引入细粒度逻辑，例如压缩、打包、语言翻译和其他更多。
     rules: [
       {
         // 判断是否满足loader条件，使用文件名匹配。当匹配时，如果要使用多个loader
@@ -62,8 +79,11 @@ module.exports = {
         // loader配置使用的loader，可以在 import 语句或任何等效于 "import" 的方式中指定 loader。
         // 使用 ! 将资源中的 loader 分开。分开的每个部分都相对于当前目录解析。通过前置所有规则及使用 !，可以对应覆盖到配置中的任意 loader。
         // 选项可以传递查询参数，例如 ?key=value&foo=bar，或者一个 JSON 对象，例如 ?{"key":"value","foo":"bar"}。
+        // loader是Rule.use: [ { loader } ]的简写。多个的时候需要使用use。
         loader: 'eslint-loader',
+        // 可能的值有："pre" | "post"，所有 loader 通过 前置, 行内, 普通, 后置 排序，并按此顺序使用。
         enforce: 'pre',
+        // =resource.include:包含此文件夹下的文件，参考(https://doc.webpack-china.org/configuration/module/#-)
         include: [resolve('src'), resolve('test')],
         options: {
           formatter: require('eslint-friendly-formatter')
@@ -81,6 +101,8 @@ module.exports = {
       },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+        // 这个的options可以行内化：url-loader?limit=1000&name=img/[name].[hash:7].[ext]
+        // 多个loader也可以内联，用!隔开多个loader，加载顺序从右到左
         loader: 'url-loader',
         options: {
           limit: 10000,

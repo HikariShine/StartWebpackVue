@@ -10,6 +10,20 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
 
+
+// 此模式是环境分离到不同文件的模式，通过merge合并配置。还可以单文件配置环境，如下：
+//-module.exports = {
+//+module.exports = function(env, argv) {
+//+  return {
+//+    devtool: env.production ? 'source-maps' : 'eval',
+//     plugins: [
+//       new webpack.optimize.UglifyJsPlugin({
+//+        compress: argv['optimize-minimize'] // 只有传入 -p 或 --optimize-minimize
+//       })
+//     ]
+//+  };
+//};
+
 const env = process.env.NODE_ENV === 'testing'
   ? require('../config/test.env')
   : config.build.env
@@ -27,8 +41,20 @@ const webpackConfig = merge(baseWebpackConfig, {
     filename: utils.assetsPath('js/[name].[chunkhash].js'),
     chunkFilename: utils.assetsPath('js/[id].[chunkhash].js')
   },
+  // 插件是 wepback 的支柱功能。webpack 自身也是构建于，你在 webpack 配置中用到的相同的插件系统之上。
+  // 插件目的在于解决 loader 无法实现的其他事。
+  // webpack 插件是一个具有 apply 属性的 JavaScript 对象。apply 属性会被 webpack compiler 调用
+  // 并且 compiler 对象可在整个编译生命周期访问。
+  // function ConsoleLogOnBuildWebpackPlugin() {};
+  // ConsoleLogOnBuildWebpackPlugin.prototype.apply = function(compiler) {
+    // compiler.plugin('run', function(compiler, callback) {
+      // console.log("webpack 构建过程开始！！！");
+      // callback();
+    // });
+  // };
   plugins: [
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
+    // 由于插件可以携带参数/选项，你必须在 webpack 配置中，向 plugins 属性传入 new 实例。
     new webpack.DefinePlugin({
       'process.env': env
     }),
