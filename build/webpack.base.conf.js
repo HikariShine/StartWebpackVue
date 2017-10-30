@@ -50,6 +50,8 @@ module.exports = {
       // 文档里没见，大概是指本项目js的解析目录为src？
       '@': resolve('src'),
     }
+    // import等导入时默认使用resolve.modules中指定的目录。
+    // 你可以替换初始模块路径，此替换路径通过使用 resolve.alias 配置选项来创建一个别名。
   },
   // module用于加载loader，loader仅仅基于文件进行转换，而插件就没有这个限制。
   // 这个配置文件里没有，插件使用plugins:定义，常用于（但不限于）在打包模块的
