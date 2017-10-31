@@ -1,10 +1,14 @@
 'use strict'
+// 获取path库
 const path = require('path')
+// 加载本项目的utils
 const utils = require('./utils')
+// 加载本项目的config
 const config = require('../config')
 // 加载vue loader的config
 const vueLoaderConfig = require('./vue-loader.conf')
 
+// 添加一个resolve函数，把dir解析为父文件夹下的dir。
 function resolve (dir) {
   return path.join(__dirname, '..', dir)
 }
@@ -12,8 +16,8 @@ function resolve (dir) {
 // 占位符标志[]，支持的占位符有https://doc.webpack-china.org/configuration/output#output-filename
 module.exports = {
   // 基础目录，绝对路径，用于从配置中解析入口起点(entry point)和 loader
-  // 默认使用当前目录，但是推荐在配置中传递一个值。这使得你的配置独立于 CWD(current working directory - 当前执行路径)。
-  context: __dirname,
+  // 默认使用当前目录(当前目录指当前命令行所在目录)，但是推荐在配置中传递一个值。这使得你的配置独立于 CWD(current working directory - 当前执行路径)。
+  // context: __dirname,
   // https://doc.webpack-china.org/concepts/entry-points
   // 如果传入一个字符串或字符串数组，chunk 会被命名为 main。如果传入一个对象，则每个键(key)会是 chunk 的名称，该值描述了 chunk 的入口起点。
   entry: {
@@ -91,16 +95,19 @@ module.exports = {
           formatter: require('eslint-friendly-formatter')
         }
       },
+      // 没啥说的，用于处理vue的loader，详细见vueLoaderConfig
       {
         test: /\.vue$/,
         loader: 'vue-loader',
         options: vueLoaderConfig
       },
+      // 使用babel-loader进行js转码，配置在项目根目录的.babelrc文件中
       {
         test: /\.js$/,
         loader: 'babel-loader',
         include: [resolve('src'), resolve('test')]
       },
+      // 使用url-loader处理图片，小图片直接内联url data base64。格式为：url="data:image/png;base64"
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
         // 这个的options可以行内化：url-loader?limit=1000&name=img/[name].[hash:7].[ext]
@@ -111,6 +118,7 @@ module.exports = {
           name: utils.assetsPath('img/[name].[hash:7].[ext]')
         }
       },
+      // 同上，放在不同的文件夹下
       {
         test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
         loader: 'url-loader',
@@ -119,6 +127,7 @@ module.exports = {
           name: utils.assetsPath('media/[name].[hash:7].[ext]')
         }
       },
+      // 同上，放在不同的文件夹
       {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
         loader: 'url-loader',
