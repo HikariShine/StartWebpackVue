@@ -45,7 +45,9 @@ module.exports = {
     assetsSubDirectory: 'static',
     // 同上
     assetsPublicPath: '/',
-    // 应该是指代理
+    // 应该是指代理，给proxyMiddleware使用的代理表，用于把一个http请求代理到另外一个地址
+    // 例如dev-server开放请求localhost:8080，但是此时后端服务器是localhost:9090
+    // 就可以使用这个table来把8080的请求代理到9090
     proxyTable: {},
     // CSS Sourcemaps off by default because relative paths are "buggy"
     // with this option, according to the CSS-Loader README

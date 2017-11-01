@@ -1,8 +1,11 @@
 'use strict'
 const path = require('path')
 const config = require('../config')
+// extract-text-webpack-plugin可以提取bundle中的特定文本，将提取后的文本单独存放到另外的文件
+// 这里用来提取css样式
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 
+// 资源文件的存放路径
 exports.assetsPath = function (_path) {
   const assetsSubDirectory = process.env.NODE_ENV === 'production'
     ? config.build.assetsSubDirectory
@@ -25,7 +28,13 @@ exports.cssLoaders = function (options) {
   // generate loader string to be used with extract text plugin
   // 根据文件类型生成loader及其配置，css有很多格式：css、less、sass、scss、stylus、styl等
   function generateLoaders (loader, loaderOptions) {
+    // 默认是cssLoader
     const loaders = [cssLoader]
+    // 如果非css，则增加一个处理预编译语言的loader并设好相关配置属性
+    // 例如generateLoaders('less')，这里就会push一个less-loader
+    // less-loader先将less编译成css，然后再由css-loader去处理css
+    // 其他sass、scss等语言也是一样的过程
+    if (loader) {
     if (loader) {
       loaders.push({
         loader: loader + '-loader',
@@ -46,11 +55,13 @@ exports.cssLoaders = function (options) {
         fallback: 'vue-style-loader'
       })
     } else {
+      // 无需提取样式则简单使用vue-style-loader配合各种样式loader去处理<style>里面的样式
       return ['vue-style-loader'].concat(loaders)
     }
   }
 
   // https://vue-loader.vuejs.org/en/configurations/extract-css.html
+  // 得到各种不同处理样式的语言所对应的loader
   return {
     css: generateLoaders(),
     postcss: generateLoaders(),

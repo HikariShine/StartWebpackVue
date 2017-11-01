@@ -1,2 +1,3 @@
+# eslint忽略路径
 build/*.js
 config/*.js

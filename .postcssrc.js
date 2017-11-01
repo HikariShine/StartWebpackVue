@@ -1,4 +1,5 @@
 // https://github.com/michael-ciniawsky/postcss-load-config
+// postcss的默认配置文件
 
 module.exports = {
   "plugins": {
