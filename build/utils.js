@@ -48,6 +48,7 @@ exports.cssLoaders = function (options) {
     // Extract CSS when that option is specified
     // (which is the case during production build)
     // 如果需要extract，则使用ExtractTextPlugin插件进行提取。提取指定文件中css，如果需要文本也提取，则使用plugin。
+    // 目的是把css单独提取到文件，否则css会作为<style></sytle>打包到html中
     if (options.extract) {
       return ExtractTextPlugin.extract({
         use: loaders,

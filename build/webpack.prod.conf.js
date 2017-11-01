@@ -42,6 +42,7 @@ const webpackConfig = merge(baseWebpackConfig, {
       // Source Maps不仅仅是一个.map后缀的文件，而是由浏览器、.map文件生成器和.map文件组成的一套技术方案
       sourceMap: config.build.productionSourceMap,
       // 代表把style提取到单独的文件中，使用ExtractTextPlugin插件执行此操作。
+      // 如果不提取到单独文件中，则会被通过js使用<style>标签引入此样式。提取后则使用文件引入。
       extract: true
     })
   },
