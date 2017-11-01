@@ -173,6 +173,11 @@ const webpackConfig = merge(baseWebpackConfig, {
       name: 'manifest',
       chunks: ['vendor']
     }),
+    /* 上面的补充
+      你可能会感兴趣，webpack及其插件似乎“知道”应该哪些文件生成。答案是，通过 manifest，webpack 能够对「你的模块映射到输出 bundle 的过程」保持追踪。如果你对通过其他方式来管理 webpack 的输出更感兴趣，那么首先了解 manifest 是个好的开始。
+      通过使用 WebpackManifestPlugin，可以直接将数据提取到一个 json 文件，以供使用。
+      我们不会在此展示一个关于如何在你的项目中使用此插件的完整示例，但是你可以仔细深入阅读 manifest 的概念页面，以及通过缓存指南来弄清如何与长期缓存相关联。
+    */
     // copy custom static assets
     // 将static文件夹里面的静态资源复制到dist/static
     new CopyWebpackPlugin([
