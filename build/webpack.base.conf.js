@@ -138,4 +138,15 @@ module.exports = {
       }
     ]
   }
+  // 还可配置externals用于表示已从外部引用的对象。如：
+  /* externals: {
+    lodash: {
+      commonjs: 'lodash',
+      commonjs2: 'lodash',
+      amd: 'lodash',
+      root: '_'
+    }
+  } */
+  // 这意味着你的 library 需要一个名为 lodash 的依赖，这个依赖在用户的环境中必须存在且可用。也可指定正则表达式。
+  // webpack --env.NODE_ENV=local --env.production --progress
 }

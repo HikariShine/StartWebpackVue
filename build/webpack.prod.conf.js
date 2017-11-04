@@ -133,6 +133,13 @@ const webpackConfig = merge(baseWebpackConfig, {
     // keep module.id stable when vender modules does not change
     // 该插件会根据模块的相对路径生成一个四位数的hash作为模块id, 建议用于生产环境。
     // (https://doc.webpack-china.org/plugins/hashed-module-ids-plugin/)
+    // 如果不使用此插件，会导致一旦依赖模块数量改变，模块的id都会改变，如果output中文件名是chunkHash，则文件名hash也会改变。
+    // 所有导出的文件都会受到module.id的改变的影响。每个 module.id 会基于默认的解析顺序(resolve order)进行增量。也就是说，当解析顺序发生变化，ID 也会随之改变。
+    // main bundle 会随着自身的新增内容的修改，而发生变化
+    // vendor bundle 会随着自身的 module.id 的修改，而发生变化。
+    // runtime bundle 会因为当前包含一个新模块的引用，而发生变化。
+    // 幸运的是，可以使用两个插件来解决这个问题。第一个插件是 NamedModulesPlugin，将使用模块的路径，而不是数字标识符。
+    // 虽然此插件有助于在开发过程中输出结果的可读性，然而执行时间会长一些。第二个选择是使用 HashedModuleIdsPlugin，推荐用于生产环境构建
     new webpack.HashedModuleIdsPlugin(),
     // split vendor js into its own file
     // CommonsChunkPlugin 插件，是一个可选的用于建立一个独立文件(又称作 chunk)的功能，
@@ -169,6 +176,7 @@ const webpackConfig = merge(baseWebpackConfig, {
     // 就会单独抽离webpack bootstrap逻辑到单独的文件中。
     // To extract the webpack bootstrap logic into a separate file, use the CommonsChunkPlugin on a name which is not defined as entry
     // Commonly the name manifest is used. See the caching guide for details.
+    // 注意，引入顺序在这里很重要。CommonsChunkPlugin 的 'vendor' 实例，必须在 'manifest'(名字随便) 实例之前引入。
     new webpack.optimize.CommonsChunkPlugin({
       name: 'manifest',
       chunks: ['vendor']
@@ -177,6 +185,17 @@ const webpackConfig = merge(baseWebpackConfig, {
       你可能会感兴趣，webpack及其插件似乎“知道”应该哪些文件生成。答案是，通过 manifest，webpack 能够对「你的模块映射到输出 bundle 的过程」保持追踪。如果你对通过其他方式来管理 webpack 的输出更感兴趣，那么首先了解 manifest 是个好的开始。
       通过使用 WebpackManifestPlugin，可以直接将数据提取到一个 json 文件，以供使用。
       我们不会在此展示一个关于如何在你的项目中使用此插件的完整示例，但是你可以仔细深入阅读 manifest 的概念页面，以及通过缓存指南来弄清如何与长期缓存相关联。
+      https://doc.webpack-china.org/guides/caching/
+      可以看到，bundle 的名称是它内容（通过 hash）的映射。如果我们不做修改，然后再次运行构建，我们的文件名按照期望，依然保持不变。然而，如果我们再次运行，可能会发现情况并非如此
+      这也是因为 webpack 在入口 chunk 中，包含了某些样板(boilerplate)，特别是 runtime 和 manifest。（译注：样板(boilerplate)指 webpack 运行时的引导代码）
+      输出可能会因当前的 webpack 版本而稍有差异。新版本不一定有和旧版本相同的 hash 问题，但我们以下推荐的步骤，仍然是可靠的。
+      提取模板(Extracting Boilerplate)
+      就像我们之前从代码分离了解到的，CommonsChunkPlugin 可以用于将模块分离到单独的文件中。然而 CommonsChunkPlugin 有一个较少有人知道的功能是
+      能够在每次修改后的构建结果中，将 webpack 的样板(boilerplate)和 manifest 提取出来。通过指定 entry 配置中未用到的名称，此插件会自动将我们需要的内容提取到单独的包中：
+      将第三方库(library)（例如 lodash 或 react）提取到单独的 vendor chunk 文件中，是比较推荐的做法，这是因为，它们很少像本地的源代码那样频繁修改。
+      因此通过实现以上步骤，利用客户端的长效缓存机制，可以通过命中缓存来消除请求，并减少向服务器获取资源
+      同时还能保证客户端代码和服务器端代码版本一致。这可以通过使用新的 entry(入口) 起点
+      以及再额外配置一个 CommonsChunkPlugin 实例的组合方式来实现
     */
     // copy custom static assets
     // 将static文件夹里面的静态资源复制到dist/static
